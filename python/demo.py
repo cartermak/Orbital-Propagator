@@ -3,28 +3,42 @@ Copyright (c) 2020 Carter Mak
 """
 
 import OrbitalPropagator
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 
 
 def main():
-    propagator = OrbitalPropagator.SimplePropagator()
-    propagator.timespan = (0, 60*90)  # One month ish
 
+    # Instantiate a simple propagator
+    propagator = OrbitalPropagator.SimplePropagator()
+
+    # Define a 90-minute time span (roughly 1 orbit for the ISS)
+    propagator.timespan = (0, 5*60*90)
+
+    # Define the Earth. Use default position and velocity (origin and zero)
     propagator.addBody(
         name="Earth",
         mass=6E24
     )
 
+    # Define the ISS. Start at +X axis heading in +Y direction
     propagator.addBody(
         name="ISS",
         position=np.array([6800000, 0, 0]),
-        velocity=np.array([0, 7650000, 0]),
+        velocity=np.array([0, 7650, 0]),
         mass=500000
     )
 
-    t_arr, y_arr = propagator.propagate()
+    # Run the actual propagation
+    propagator.propagate()
 
-    
+    # Plot the results
+    t,x,y,z = propagator.bodies[1].getVectorComponentSeries()
+    fig = plt.figure()
+    ax = fig.add_subplot(1,1,1,projection='3d')
+    ax.plot(x,y,z)
+    plt.savefig('ISS_orbit.png')
 
 
 if __name__ == "__main__":
