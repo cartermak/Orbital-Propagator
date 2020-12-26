@@ -11,7 +11,8 @@ import numpy as np
 def main():
 
     # Instantiate an integrator for the propagation
-    integrator = OrbitalPropagator.EulerIntegrator()
+    # integrator = OrbitalPropagator.EulerIntegrator()
+    integrator = OrbitalPropagator.NaiveRKF45Integrator()
 
     # Instantiate a simple propagator
     propagator = OrbitalPropagator.SimplePropagator(integrator)
@@ -41,7 +42,7 @@ def main():
     fig = plt.figure()
     ax = fig.add_subplot(1,1,1,projection='3d')
     ax.plot(x,y,z)
-    plt.savefig('ISS_orbit.png')
+    plt.savefig('ISS_orbit.png',dpi=600)
 
 
 if __name__ == "__main__":
