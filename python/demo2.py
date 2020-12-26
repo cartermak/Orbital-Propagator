@@ -14,31 +14,39 @@ def main():
 
     # Instantiate a simple propagator
     propagator = OrbitalPropagator.SimplePropagator(integrator)
+    propagator.integratorArgs["maxArgs"] = 1e5
 
     # Define a 90-minute time span (roughly 1 orbit for the ISS)
-    propagator.timespan = (0, 5*60*90)
+    propagator.timespan = (0, 60*60*24*10)
 
-    # Define the Earth. Use default position and velocity (origin and zero)
+    # Define a stationary body
     propagator.addBody(
-        name="Earth",
-        mass=6E24
+        name="Body1",
+        mass=1e26
     )
 
-    # Define the ISS. Start at +X axis heading in +Y direction
+    # Define a moving body
     propagator.addBody(
-        name="ISS",
-        position=np.array([6800000, 0, 0]),
-        velocity=np.array([0, 7650, 0]),
-        mass=500000
+        name="Body2",
+        position=np.array([5e7, 1e7, 1e7]),
+        velocity=np.array([-1000, 0, 0]),
+        mass=1e24
+    )
+
+    # Define a moving body
+    propagator.addBody(
+        name="Body3",
+        position=np.array([-5e7, -1e7, -1e7]),
+        velocity=np.array([1000, 0, 0]),
+        mass=1e24
     )
 
     # Run the actual propagation
     propagator.propagate()
 
     # Plot results
-    plotter = OrbitalPropagator.Plotter()
-    plotter.addBody(propagator.bodies[1])
-    plotter.plotOrbits("ISS_orbit_RKF45.png",dpi=1000)
+    plotter = OrbitalPropagator.Plotter(propagator.bodies)
+    plotter.plotOrbits("ThreeBody.png",dpi=1000)
 
 
 if __name__ == "__main__":
