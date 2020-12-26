@@ -3,7 +3,7 @@ Copyright (c) 2020 Carter Mak
 """
 
 from OrbitalPropagator.Body import Body
-from OrbitalPropagator.NumericalIntegrator import EulerIntegrator
+from OrbitalPropagator.NumericalIntegrator import NumericalIntegrator, EulerIntegrator, RKF45Integrator
 
 import math
 import numpy as np
@@ -20,10 +20,16 @@ class _Propagator:
 
         # Break out optional arguments
         self.bodies = kwargs.get('bodies', list())
-        self.timespan = kwargs.get('timespan', (0, 3600))
+        self.timespan = kwargs.get('timespan', (0, 0))
 
         # Define necessary constant(s)
         self._G = 6.67430E-11
+
+        # Define arbitrary integrator
+        self.integrator = NumericalIntegrator()
+
+        # Define additional integrator arguments
+        self.integratorArgs = {}
 
         return
 
@@ -51,28 +57,33 @@ class _Propagator:
         if self.N == 0:
             raise Exception("No bodies present in model.")
 
-        # TODO Method to actually perform the propagation
-        # Step 1: Define ODE function
-        # Step 2: Pass to propagator
-
         def odeFun(t, y): return self._odeFun(t, y)
 
-        integrator = EulerIntegrator(
+        tArr, yArr = self.integrator.integrate(
             odeFun,
             self._getInitialValue(),
-            self.timespan
+            self.timespan,
+            **self.integratorArgs
         )
 
-        t_arr, y_arr = integrator.integrate()
+        # Break out stored state vectors and write them to each body
+        for i in range(self.N):
+            n_fields = self.bodies[i].n_fields
+            tmpArr = [
+                y[n_fields*(i):n_fields*(i+1)]
+                for y in yArr
+            ]
+            self.bodies[i].parseStateVectorArray(tmpArr, tArr)
 
-        return (t_arr, y_arr)
+        return
 
     def _odeFun(self, _, y):
 
         # Update member properties
         for i in range(self.N):
+            n_fields = self.bodies[i].n_fields
             self.bodies[i].setStateVector(y[
-                self.bodies[i].n_fields*(i):self.bodies[i].n_fields*(i+1)
+                n_fields*(i):n_fields*(i+1)
             ])
 
         zero_array = np.array([0.0, 0.0, 0.0])
@@ -90,7 +101,7 @@ class _Propagator:
 
                 # Calculate radius vector and distance
                 R = pos_j - pos_i  # Position vector from i to j
-                r = np.sqrt(np.dot(R, R))  # Distance between i and j
+                r = np.sqrt(R.dot(R))  # Distance between i and j
 
                 # Calculate force vector
                 F_ij = (self._G*mass_i*mass_j/(r**3)) * \
@@ -122,4 +133,24 @@ class _Propagator:
 
 
 class SimplePropagator(_Propagator):
-    pass
+    def __init__(self, *args, **kwargs):
+
+        # Start with instantiation of superclass
+        super().__init__(*args, **kwargs)
+
+        # Change the integrator to use Euler integration
+        self.integrator = EulerIntegrator()
+
+        return
+
+
+class RKF45Propagator(_Propagator):
+    def __init__(self, *args, **kwargs):
+
+        # Start with instantiation of superclass
+        super().__init__(*args, **kwargs)
+
+        # Change the integrator to use RKF45
+        self.integrator = RKF45Integrator()
+
+        return

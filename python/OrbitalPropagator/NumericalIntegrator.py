@@ -5,7 +5,7 @@ Copyright (c) 2020 Carter Mak
 import numpy as np
 import typing
 
-class _NumericalIntegrator:
+class NumericalIntegrator:
     def __init__(self):
         return
 
@@ -19,60 +19,55 @@ class _NumericalIntegrator:
 
 
 """Euler Integration Class"""
-class EulerIntegrator(_NumericalIntegrator):
-    def __init__(
-        self,
-        odeFun,
-        y0: np.ndarray,
-        timespan: typing.Tuple
-    ):
+class EulerIntegrator(NumericalIntegrator):
+    def __init__(self):
 
         # Pre-define the number of steps to use
-        self.n_steps = 100
-
-        # Store member variables
-        self.odeFun = odeFun
-        self.y0 = y0
-        self.timespan = timespan
+        self.n_steps = 10000
 
         # Superclass constructor call
         super().__init__()
 
-    def integrate(self) -> np.ndarray:
+    def integrate(
+        self,
+        odeFun,
+        y0: np.ndarray,
+        timespan: typing.Tuple
+    ) -> np.ndarray:
 
         # Calculate time step based on span and number of steps
-        startTime, endTime = self.timespan
+        startTime, endTime = timespan
         duration = endTime-startTime
         timestep = duration/self.n_steps
 
         # Store state vector
-        y = self.y0
-        self.y_arr = [self.y0]
+        y = y0
+        yArr = [y0]
 
         # Initialize time value
         t = startTime
-        self.t_arr = [t]
+        tArr = [t]
 
-        for i in range(self.n_steps+2):
+        while t < endTime:
 
             # Calculate derivative of state vector
-            y_dot = self.odeFun(t, y)
+            y_dot = odeFun(t, y)
 
             # Iterate time value
-            t += timestep
+            t  = t + timestep
 
             # Next time step
-            y += timestep*y_dot
+            y = y + timestep*y_dot
 
             # Store updated state vector to list
-            self.y_arr.append(y)
+            yArr.append(y)
 
             # Store time stamp to list
-            self.t_arr.append(t)
+            tArr.append(t)
         
-        return (self.t_arr,self.y_arr)
+        return (tArr,yArr)
 
-class RKF45(_NumericalIntegrator):
+class RKF45Integrator(NumericalIntegrator):
     def __init__(self):
 
         # Superclass constructor call
