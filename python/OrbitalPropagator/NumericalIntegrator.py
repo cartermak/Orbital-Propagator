@@ -9,13 +9,15 @@ class NumericalIntegrator:
     def __init__(self):
         return
 
-    def integrate(self, odefun, y0: np.ndarray, timespan: typing.Tuple):
+    def integrate(self):
         """Numerically integrate the given ODE function.
 
-        Arguments:
-        odefun -- lambda function which takes in the time and 
+        TEMPLATE ONLY
         """
-        return
+
+        raise Warning("NumericalIntegrator is only a template.")
+
+        exit(0)
 
 
 """Euler Integration Class"""

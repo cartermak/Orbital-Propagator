@@ -14,7 +14,7 @@ class Body:
         self.name = kwargs.get('name', None)
         self.position = kwargs.get('position', np.array([0.0, 0.0, 0.0]))
         self.velocity = kwargs.get('velocity', np.array([0.0, 0.0, 0.0]))
-        self.mass = kwargs.get('mass', 0)
+        self.mass = kwargs.get('mass', 1)
         self.force = np.array([0.0, 0.0, 0.0])
 
         # Ensure position and velocity are typed as floats

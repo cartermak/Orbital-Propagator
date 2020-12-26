@@ -3,19 +3,28 @@ Copyright (c) 2020 Carter Mak
 """
 
 from OrbitalPropagator.Body import Body
-from OrbitalPropagator.NumericalIntegrator import NumericalIntegrator, EulerIntegrator, RKF45Integrator
+from OrbitalPropagator.NumericalIntegrator import NumericalIntegrator
 
 import math
 import numpy as np
 
 
-class _Propagator:
-    def __init__(self, *args, **kwargs):
+class SimplePropagator:
+    def __init__(
+        self,
+        integrator = NumericalIntegrator(),
+        integratorArgs = {},
+        *args, **kwargs
+    ):
         """Class constructor
 
-        Arguments (optional):
-        bodies -- list of Body-typed objects to include in the model
-        timespan -- tuple of start and end times
+        Arguments:
+            integrator: NumericalIntegrator object for propagation
+            integratorArgs: Dictionary of additional arguments to pass
+
+        Keyword Arguments (optional):
+            bodies: list of Body-typed objects to include in the model
+            timespan: tuple of start and end times
         """
 
         # Break out optional arguments
@@ -25,11 +34,11 @@ class _Propagator:
         # Define necessary constant(s)
         self._G = 6.67430E-11
 
-        # Define arbitrary integrator
-        self.integrator = NumericalIntegrator()
+        # Save integrator as a member
+        self.integrator = integrator
 
         # Define additional integrator arguments
-        self.integratorArgs = {}
+        self.integratorArgs = integratorArgs
 
         return
 
@@ -41,9 +50,9 @@ class _Propagator:
 
         Keyword Args:
             name (string, optional): Name of body to add
-            position (np.ndarray(3),optional): initial position
-            velocity (np.ndarray(3),optional): initial velocity
-            mass (float, optional): mass of the body
+            position (np.ndarray(3),optional): initial position. Defaults to origin.
+            velocity (np.ndarray(3),optional): initial velocity Defaults to zeros.
+            mass (float, optional): mass of the body. Defaults to 1.
         """
         if body is None:
             body = Body(*args, **kwargs)
@@ -130,27 +139,3 @@ class _Propagator:
         ], axis=0)
 
         return systemStateVector
-
-
-class SimplePropagator(_Propagator):
-    def __init__(self, *args, **kwargs):
-
-        # Start with instantiation of superclass
-        super().__init__(*args, **kwargs)
-
-        # Change the integrator to use Euler integration
-        self.integrator = EulerIntegrator()
-
-        return
-
-
-class RKF45Propagator(_Propagator):
-    def __init__(self, *args, **kwargs):
-
-        # Start with instantiation of superclass
-        super().__init__(*args, **kwargs)
-
-        # Change the integrator to use RKF45
-        self.integrator = RKF45Integrator()
-
-        return

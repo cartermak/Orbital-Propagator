@@ -10,8 +10,11 @@ import numpy as np
 
 def main():
 
+    # Instantiate an integrator for the propagation
+    integrator = OrbitalPropagator.EulerIntegrator()
+
     # Instantiate a simple propagator
-    propagator = OrbitalPropagator.SimplePropagator()
+    propagator = OrbitalPropagator.SimplePropagator(integrator)
 
     # Define a 90-minute time span (roughly 1 orbit for the ISS)
     propagator.timespan = (0, 5*60*90)
