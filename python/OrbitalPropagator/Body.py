@@ -3,6 +3,7 @@ Copyright (c) 2020 Carter Mak
 """
 
 import numpy as np
+import typing
 
 
 class Body:
@@ -45,5 +46,38 @@ class Body:
     def setStateVector(self, state: np.ndarray):
         """Pass in a state vector to update the state of the body."""
 
-        self.position = state[0:3]
-        self.velocity = state[3:6]
+        self.position, self.velocity = self._parseStateVector(state)
+
+        return
+
+    def parseStateVectorArray(
+        self,
+        stateVectorArr: typing.List,
+        tArr: typing.List
+    ):
+
+        # Store time vector
+        self.tArr = tArr
+
+        # Initialize empty lists
+        self.positionArr = []
+        self.velocityArr = []
+
+        # Loop over array of state vectors and parse them
+        # back into menaingful vectors
+        for s in stateVectorArr:
+            position, velocity = self._parseStateVector(s)
+            self.positionArr.append(position)
+            self.velocityArr.append(velocity)
+    
+    def getVectorComponentSeries(self):
+        x,y,z = zip(*self.positionArr)
+
+        return(self.tArr,x,y,z)
+
+    def _parseStateVector(self, state: np.ndarray) -> (np.ndarray, np.ndarray):
+
+        position = state[0:3]
+        velocity = state[3:6]
+
+        return (position, velocity)
